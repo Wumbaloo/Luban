@@ -23,7 +23,6 @@ const Avatar: React.FC = () => {
         try {
             setLoading(true);
             const { body: res } = await api.getUserInfo(token);
-            console.log('line:26 res::: ', res);
             if (res.code === 200) {
                 setUserInfo(res.data);
             } if (res.code === 100010110) {
@@ -39,8 +38,7 @@ const Avatar: React.FC = () => {
         }
     };
     // define Login
-    // const loginBaseUrl = 'https://id.snapmaker.com';
-    const loginBaseUrl = 'http://localhost:9000';
+    const loginBaseUrl = 'https://id.snapmaker.com';
     const handleLogin = () => {
         if (loading) return;
         setIframeUrl(`${loginBaseUrl}?postKey=Luban`);
@@ -63,7 +61,6 @@ const Avatar: React.FC = () => {
         window.addEventListener(
             'message',
             (event) => {
-                console.log('line:65 event::: ', event);
                 setIframeUrl('https://snapmaker.com');
                 const token = event.data;
                 if (token && typeof token === 'string') {
