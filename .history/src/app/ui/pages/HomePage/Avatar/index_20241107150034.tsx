@@ -16,7 +16,9 @@ const Avatar: React.FC = () => {
     const showModal = () => {
         setIsModalVisible(true);
     };
-    const handleCancel = () => {
+    const handleCancel = (e) => {
+        console.log('line:20 e::: ', e);
+        setIframeUrl('');
         setIsModalVisible(false);
     };
     const handleToken = async (token: string) => {
@@ -40,14 +42,14 @@ const Avatar: React.FC = () => {
     // define Login
     const handleLogin = () => {
         if (loading) return;
-        setIframeUrl('https://id.snapmaker.com?postKey=Luban');
+        setIframeUrl('http://localhost:9000?postKey=Luban');
         showModal();
     };
     // define Logout
     const handleLogout = () => {
         machineStore.set('machine-token', '');
         setUserInfo(null);
-        setIframeUrl('http://id.snapmaker.com/logout#Luban');
+        setIframeUrl('http://localhost:9000/logout#Luban');
         showModal();
     };
     // define Main
@@ -60,8 +62,10 @@ const Avatar: React.FC = () => {
         window.addEventListener(
             'message',
             (event) => {
+                console.log('line:65 event::: ', event);
                 setIframeUrl('https://snapmaker.com');
                 const token = event.data;
+                if (!token) return;
                 if (token && typeof token === 'string') {
                     if (token === 'logout') {
                         setIframeUrl('https://snapmaker.com');
@@ -95,6 +99,7 @@ const Avatar: React.FC = () => {
 
     return (
         <div id="avatar-box" className={styles.avatarBox}>
+            iframeUrl: {iframeUrl}
             {
                 userInfo?.id ? (
                     <Dropdown overlay={menu} trigger={['click', 'hover']}>
@@ -126,14 +131,15 @@ const Avatar: React.FC = () => {
                 onCancel={handleCancel}
                 className={styles.iframeModal}
                 footer={null}
-                destroyOnClose
                 getContainer={() => document.getElementById('avatar-box')}
             >
-                <div className={styles.iframeBox}>
-                    <iframe id="dashboard" key={iframeUrl} src={iframeUrl} title="iframe">
-                        <p>Your browser does not support the iframe tag.</p>
-                    </iframe>
-                </div>
+                { iframeUrl && (
+                    <div className={styles.iframeBox}>
+                        <iframe id="dashboard" key={iframeUrl} src={iframeUrl} title="iframe">
+                            <p>Your browser does not support the iframe tag.</p>
+                        </iframe>
+                    </div>
+                )}
             </Modal>
         </div>
     );

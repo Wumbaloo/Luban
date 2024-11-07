@@ -126,7 +126,6 @@ const Avatar: React.FC = () => {
                 onCancel={handleCancel}
                 className={styles.iframeModal}
                 footer={null}
-                destroyOnClose
                 getContainer={() => document.getElementById('avatar-box')}
             >
                 <div className={styles.iframeBox}>

@@ -40,14 +40,14 @@ const Avatar: React.FC = () => {
     // define Login
     const handleLogin = () => {
         if (loading) return;
-        setIframeUrl('https://id.snapmaker.com?postKey=Luban');
+        setIframeUrl('http://localhost:9000?postKey=Luban');
         showModal();
     };
     // define Logout
     const handleLogout = () => {
         machineStore.set('machine-token', '');
         setUserInfo(null);
-        setIframeUrl('http://id.snapmaker.com/logout#Luban');
+        setIframeUrl('http://localhost:9000/logout#Luban');
         showModal();
     };
     // define Main
@@ -126,7 +126,6 @@ const Avatar: React.FC = () => {
                 onCancel={handleCancel}
                 className={styles.iframeModal}
                 footer={null}
-                destroyOnClose
                 getContainer={() => document.getElementById('avatar-box')}
             >
                 <div className={styles.iframeBox}>
