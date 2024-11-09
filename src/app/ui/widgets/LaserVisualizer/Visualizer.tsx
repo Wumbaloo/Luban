@@ -752,6 +752,8 @@ class Visualizer extends React.Component<VisualizerProps> {
                 {/* Simplify Model */
                     this.props.pageMode === PageMode.MaterialTest && (
                         <MaterialTestModal
+                            coordinateMode={this.props.coordinateMode}
+                            coordinateSize={this.props.coordinateSize}
                             onClose={() => { this.props.setPageMode(PageMode.Default); }}
                         />
                     )

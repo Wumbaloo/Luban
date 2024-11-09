@@ -172,8 +172,8 @@ class GcodeParameters extends PureComponent {
                 laserDefinitionPower[key] = { ...allDefinition[key] };
             }
         });
-        if (typeof laserDefinitionSpeed.fixedPower === 'object' && laserDefinitionSpeed.fixedPower !== null) {
-            laserDefinitionSpeed.fixedPower.hidden = Boolean(this.props.noNeedName);
+        if (typeof laserDefinitionPower.fixedPower === 'object' && laserDefinitionPower.fixedPower !== null) {
+            laserDefinitionPower.fixedPower.hidden = Boolean(this.props.noNeedName);
         }
         // section Assist Gas
         const laserDefinitionAuxiliaryGasKeys = ['auxiliaryAirPump'];

@@ -11,7 +11,7 @@ const FormComponent: React.FC = () => {
             label: i18n._('key_ui-views-MaterialTestModal-FormComponent-min'),
             component: (
                 <>
-                    <InputNumber controls={false} className={styles.input} min={0} name="speedMin" defaultValue={600} />
+                    <InputNumber controls={false} className={styles.input} min={0} max={300000} name="speedMin" defaultValue={600} />
                     <span className={styles.suffix}>mm/min</span>
                 </>
             )
@@ -20,7 +20,7 @@ const FormComponent: React.FC = () => {
             label: i18n._('key_ui-views-MaterialTestModal-FormComponent-max'),
             component: (
                 <>
-                    <InputNumber controls={false} className={styles.input} min={200} name="reftMax" defaultValue={18000} />
+                    <InputNumber controls={false} className={styles.input} min={200} max={300000} name="reftMax" defaultValue={18000} />
                     <span className={styles.suffix}>mm/min</span>
                 </>
             )

@@ -1650,6 +1650,43 @@ export const actions = {
 
         dispatch(actions.resetProcessState(headType));
     },
+    createModelFromElementArr: (headType, textRectArr, boxRectArr) => async (dispatch, getState) => {
+        const { SVGActions, toolPathGroup } = getState()[headType];
+        console.log('line:1655 toolPathGroup::: ', toolPathGroup);
+        console.log('line:1655 SVGActions::: ', SVGActions);
+        console.log('line:1654 boxRectArr::: ', boxRectArr);
+        console.log('line:1654 textRectArr::: ', textRectArr);
+        try {
+            const setAttributes = (element, attributes) => {
+                Object.entries(attributes).forEach(([key, value]) => {
+                    element.setAttribute(key, value);
+                });
+            };
+            // 1.create textRect
+            const createText = async ({ text, id, x, y, w, h, needRote }) => {
+                const textSvg = await dispatch(actions.createText('laser', text));
+                setAttributes(textSvg, { id: id, class: 'text', x: x, y: y, width: w, height: h });
+                await dispatch(actions.createModelFromElement('laser', textSvg));
+                const textElement = document.getElementById(id);
+                dispatch(actions.resizeElementsImmediately('laser', [textElement], { newHeight: h, newWidth: w }));
+                if (needRote) {
+                    dispatch(actions.rotateElementsImmediately('laser', [textElement], { newAngle: -90 }));
+                }
+            };
+            for (let i = 0; i < textRectArr.length; i++) {
+                const item = textRectArr[i];
+                createText(item);
+            }
+            for (let j = 0; j < boxRectArr.length; j++) {
+                const rect = boxRectArr[j].rect;
+                await dispatch(actions.createModelFromElement('laser', rect));
+            }
+            console.log('画::: ');
+            // 2. generate toolpath
+        } catch (error) {
+            console.log('line:1683 error::: ', error);
+        }
+    },
 
     selectAllElements: headType => async (dispatch, getState) => {
         const { SVGActions, SVGCanvasMode, SVGCanvasExt, materials } = getState()[headType];

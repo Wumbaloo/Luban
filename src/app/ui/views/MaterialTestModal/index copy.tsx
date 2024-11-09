@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Spin, message } from 'antd';
+import { Modal, Spin } from 'antd';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
 import log from '../../../lib/log';
@@ -63,7 +63,7 @@ interface MaterialTestModalProps {
     coordinateMode: [];
     coordinateSize: [];
 }
-export default function MaterialTest({ onClose, coordinateSize, coordinateMode }): React.ReactElement<MaterialTestModalProps> {
+export default function MaterialTest({ onClose, coordinateSize }): React.ReactElement<MaterialTestModalProps> {
     const [loading, setLoading] = useState(false);
     const [visible, setVisible] = useState(true);
     const [saveToolPathFlag, setSaveToolPathFlag] = useState(false);
@@ -87,18 +87,9 @@ export default function MaterialTest({ onClose, coordinateSize, coordinateMode }
     };
 
     const svgNamespace = 'http://www.w3.org/2000/svg';
-    console.log('line:91 coordinateMode::: ', coordinateMode);
-    const sizeMultiplyFactor = coordinateMode.setting.sizeMultiplyFactor;
-    console.log('line:92 sizeMultiplyFactor::: ', sizeMultiplyFactor);
-    console.log('line:92 coordinateSize::: ', coordinateSize);
-    // top-left {x: 1, y: -1}
-    // top-right {x: -1, y: -1}
-    // bottom-left {x: 1, y: 1}
-    // bottom-right {x: -1, y: -1}
+
     let powX = coordinateSize.x;
     let powY = coordinateSize.y;
-    const minPowX = coordinateSize.x - coordinateSize.x / 2;
-    const minPowY = coordinateSize.y - coordinateSize.y / 2;
 
     const attributeObj = (uniqueId, x, y, w, h) => {
         return {
@@ -136,22 +127,19 @@ export default function MaterialTest({ onClose, coordinateSize, coordinateMode }
         rectWidth: number,
     };
     const textRectArray = [];
-    const textRectArr = [];
-
     const onCreatText = async (text, x, y, w, h, needRote) => {
+        const textSvg = await dispatch(actions.createText('laser', text));
         const id = uniqueId();
         const pox = powX + x;
         const poy = powY + y;
-        textRectArr.push({ id: id + text, text, x: pox, y: poy, w, h, needRote });
-        // const textSvg = await dispatch(actions.createText('laser', text));
-        // setAttributes(textSvg, { id: id, x: pox, y: poy, width: w, height: h });
-        // await dispatch(actions.createModelFromElement('laser', textSvg));
-        // const textElement = document.getElementById(id);
-        // dispatch(actions.resizeElementsImmediately('laser', [textElement], { newHeight: h, newWidth: w }));
-        // textRectArray.push(textElement);
-        // if (needRote) {
-        //     dispatch(actions.rotateElementsImmediately('laser', [textElement], { newAngle: -90 }));
-        // }
+        setAttributes(textSvg, { id: id, x: pox, y: poy, width: w, height: h });
+        await dispatch(actions.createModelFromElement('laser', textSvg));
+        const textElement = document.getElementById(id);
+        dispatch(actions.resizeElementsImmediately('laser', [textElement], { newHeight: h, newWidth: w }));
+        textRectArray.push(textElement);
+        if (needRote) {
+            dispatch(actions.rotateElementsImmediately('laser', [textElement], { newAngle: -90 }));
+        }
     };
     const selectAllElements = () => dispatch(actions.selectAllElements('laser'));
     const onSelectElements = (elements) => dispatch(actions.selectElements('laser', elements));
@@ -167,7 +155,6 @@ export default function MaterialTest({ onClose, coordinateSize, coordinateMode }
         dispatch(actions.removeSelectedModel('laser'));
 
         const svgContainer = document.getElementById('svg-data');
-        // svgContainer.innerHTML = '';
         const data: TypeDta = getFormData();
         const gap = 5;
         const { rectRows, speedMin, reftMax, rectCols, powerMax, powerMin, rectheight, rectWidth } = data;
@@ -186,19 +173,11 @@ export default function MaterialTest({ onClose, coordinateSize, coordinateMode }
         const h = Number(rectheight);
         powX -= (w + gap) * rectCols / 2;
         powY += (h + gap) * rectRows / 2;
-        const speedX = powX + (-w - h / 2) - h / 2;
-        const passesY = powY - rectRows * (gap + h) - 10;
-        if (speedX < minPowX || passesY < minPowY) {
-            console.log('越界');
-            message.warning('This is a warning message');
-            setLoading(false);
-            return;
-        }
+
         await onCreatText('Passes', rectCols / 2 * (gap + w) + 5, -rectRows * (gap + h) - 10, 20, h, false);
         await onCreatText('Power(%)', rectCols / 2 * (gap + w) + h, 2 * h, 25, h, false);
         await onCreatText('Speed(mm/m)', -w - h / 2, -rectRows / 2 * (gap + h), 30, h, true);
         // row * col create rect
-        const boxRectArr = [];
         for (let i = 0; i < rectCols; i++) {
             x += gap + w;
             await onCreatText(`${Math.round(powerMinNum + i * rex)}`, x + w / 2, h / 2, h, w, true);
@@ -209,42 +188,23 @@ export default function MaterialTest({ onClose, coordinateSize, coordinateMode }
                 const rect = document.createElementNS(svgNamespace, 'rect');
                 setAttributes(rect, attributeObj(`${uniqueId()}-${i}-${j}`, x, y, w, h));
                 svgContainer.appendChild(rect);
-                boxRectArr.push({
-                    rect,
-                    speed: Math.round(speedMinNum + j * lex),
-                    power: Math.round(powerMinNum + i * rex)
-                });
-                // await dispatch(actions.createModelFromElement('laser', rect));
-                // setWorkSpeed(Math.round(speedMinNum + j * lex));
-                // setFixedPower(Math.round(powerMinNum + i * rex));
-                // onSelectElements([rect]);
+                await dispatch(actions.createModelFromElement('laser', rect));
+                setWorkSpeed(Math.round(speedMinNum + j * lex));
+                setFixedPower(Math.round(powerMinNum + i * rex));
+                onSelectElements([rect]);
                 // setSaveToolPathFlag(true);
-                // onClearSelection();
+                onClearSelection();
                 if (i === 0) await onCreatText(`${Math.round(speedMinNum + j * lex)}`, x - w, y + h / 2, w, h, false);
             }
         }
-        // 画方块
-        await dispatch(actions.createModelFromElementArr('laser', textRectArr, boxRectArr));
-        // 生成文本路径
         setSaveToolPathFlag(false);
         setWorkSpeed(Math.round(speedMinNum + lex / 2));
         setFixedPower(Math.round(powerMinNum + rex / 2));
-        // 生成方块路径
-        console.log('line:233 生成方块路径::: ');
-        for (let m = 0; m < boxRectArr.length; m++) {
-            const item = boxRectArr[m];
-            setWorkSpeed(item.speed);
-            setFixedPower(item.power);
-            onSelectElements([item.rect]);
-            setSaveToolPathFlag(true);
-            onClearSelection();
-        }
-        // TODO 预览
-        // onSelectElements(textRectArray);
+        onSelectElements(textRectArray);
         // setSaveToolPathFlag(true);
-        // await dispatch(actions.preview('laser'));
+        await dispatch(actions.preview('laser'));
         log.info('ALL Completed:');
-        // onClearSelection();
+        onClearSelection();
         handleCancel();
     };
     const handleCreate = () => {
